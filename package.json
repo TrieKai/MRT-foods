@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 8787",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p $PORT",
+    "heroku-postbuild": "npm run build"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.11.4",
