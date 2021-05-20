@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { StationsVO } from 'utils/interface/common'
 
+// 板南線
 const blueStations: StationsVO[] = [
   {
     name: '頂埔站',
@@ -117,21 +118,148 @@ const blueStations: StationsVO[] = [
     name: '南港展覽館站',
     lat: 25.05530708945024,
     lng: 121.6179144673126
+  },
+];
+// 文湖線
+const brownStations: StationsVO[] = [
+  {
+    name: '南港展覽館站',
+    lat: 25.05530708945024,
+    lng: 121.6179144673126
+  },
+  {
+    name: '南港軟體園區站',
+    lat: 25.060073670608357,
+    lng: 121.61591739313968
+  },
+  {
+    name: '東湖站',
+    lat: 25.067401492334998,
+    lng: 121.6115108709121
+  },
+  {
+    name: '葫洲站',
+    lat: 25.07261248761594,
+    lng: 121.60738852823839
+  },
+  {
+    name: '大湖公園站',
+    lat: 25.08379506285194,
+    lng: 121.60219188308744
+  },
+  {
+    name: '內湖站',
+    lat: 25.083551227323795,
+    lng: 121.59424082018384
+  },
+  {
+    name: '文德站',
+    lat: 25.07855121454845,
+    lng: 121.58494856486035
+  },
+  {
+    name: '港墘站',
+    lat: 25.080044055011577,
+    lng: 121.57520455892721
+  },
+  {
+    name: '西湖站',
+    lat: 25.082155417580587,
+    lng: 121.56724759618534
+  },
+  {
+    name: '劍南路站',
+    lat: 25.084858175693398,
+    lng: 121.55559754411685
+  },
+  {
+    name: '大直站',
+    lat: 25.079883405763322,
+    lng: 121.54715652050903
+  },
+  {
+    name: '松山機場站',
+    lat: 25.063375923256277,
+    lng: 121.55174292533957
+  },
+  {
+    name: '中山國中站',
+    lat: 25.060777518015833,
+    lng: 121.54419960950904
+  },
+  {
+    name: '南京復興站',
+    lat: 25.05237462140356,
+    lng: 121.54407331333948
+  },
+  {
+    name: '忠孝復興站',
+    lat: 25.041623000143456,
+    lng: 121.54378372972849
+  },
+  {
+    name: '大安站',
+    lat: 25.03299167697042,
+    lng: 121.54358989283449
+  },
+  {
+    name: '科技大樓站',
+    lat: 25.026071994136036,
+    lng: 121.54346349352166
+  },
+  {
+    name: '六張犁站',
+    lat: 25.023804780255507,
+    lng: 121.55316116726371
+  },
+  {
+    name: '麟光站',
+    lat: 25.018506772667102,
+    lng: 121.55882301765116
+  },
+  {
+    name: '辛亥站',
+    lat: 25.00537970170173,
+    lng: 121.55696151286946
+  },
+  {
+    name: '萬芳醫院站',
+    lat: 24.999403769627495,
+    lng: 121.558047788913
+  },
+  {
+    name: '萬芳社區站',
+    lat: 24.998574571279207,
+    lng: 121.56809664560654
+  },
+  {
+    name: '木柵站',
+    lat: 24.998241861655252,
+    lng: 121.57314415046162
+  },
+  {
+    name: '動物園站',
+    lat: 24.998267314843226,
+    lng: 121.57951819641028
   }
-]
+];
 
 const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
   console.log(req.query);
   if (req.query.line) {
-    switch (req.query.line) {
-      case 'blue':
-        res.status(200).json({ data: blueStations })
-        break;
-      default:
-        res.status(200).json({})
-        break;
+    const lines = req.query.line as string;
+    const colors = lines.split(',');
+    let result: StationsVO[] = [];
+    if (colors.indexOf('blue') !== -1) {
+      result = result.concat(blueStations);
     }
-  } else { }
+    if (colors.indexOf('brown') !== -1) {
+      result = result.concat(brownStations);
+    }
+    res.status(200).json({ data: result });
+  } else {
+    res.status(200).json({ data: blueStations.concat(brownStations) });
+  }
 }
 
 export default GetStations;

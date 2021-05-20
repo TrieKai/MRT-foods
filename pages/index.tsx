@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import Head from "next/head";
 import styled from "styled-components";
 import { Loader } from '@googlemaps/js-api-loader';
 import { GET } from 'utils/request';
@@ -40,8 +39,11 @@ export const Home = () => {
   }, []);
 
   const getData = async () => {
-    const resp = await GET('api/getStations', { 'line': 'blue' })
-    stations.current = resp.data;
+    const resp = await GET('api/getStations', { 'line': 'blue,brown' });
+    // 過濾掉重複的捷運站
+    stations.current = resp.data.filter((station: StationsVO, i: number, self: StationsVO[]) => {
+      return i === self.findIndex(item => item.name === station.name);
+    });
     stations.current.map(station => {
       const map = maps.current;
       const marker = new window.google.maps.Marker({
@@ -80,13 +82,13 @@ export const Home = () => {
 
     // Setup the click event listeners
     controlUI.addEventListener("click", () => {
-      straw();
+      draw();
     });
   }
 
-  const straw = () => {
+  const draw = () => {
     console.log(markers)
-    const shuffledArray = Shuffle(stations.current.concat(stations.current));
+    const shuffledArray = Shuffle(stations.current);
     shuffledArray.forEach((station, i) => {
       new Promise((res, rej) => {
         setTimeout(() => {
