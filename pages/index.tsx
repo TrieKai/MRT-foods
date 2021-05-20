@@ -22,7 +22,6 @@ export const Home = () => {
       apiKey: 'AIzaSyA7dLgMg8KIMXEtN4D19b4t2-XDcy7-6Fs',
       version: 'weekly',
     });
-    // let map: google.maps.Map;
     loader.load().then(() => {
       maps.current = new window.google.maps.Map(googlemap.current, {
         center: { lat: 25.0477703, lng: 121.5168079 }, // 台北車站座標
@@ -31,26 +30,28 @@ export const Home = () => {
         streetViewControl: false,
       });
 
+      getData(); // Get stations info
+
+      // Customer button on the top center
       const centerControlDiv = document.createElement("div");
       CenterControl(centerControlDiv);
       maps.current.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
     });
-    const getData = async () => {
-      const resp = await GET('api/getStations', { 'line': 'blue' })
-      stations.current = resp.data;
-      stations.current.map(station => {
-        const map = maps.current;
-        const marker = new window.google.maps.Marker({
-          position: station,
-          map,
-          title: station.name,
-        });
-        markers.push(marker);
-      })
-    }
-
-    getData()
   }, []);
+
+  const getData = async () => {
+    const resp = await GET('api/getStations', { 'line': 'blue' })
+    stations.current = resp.data;
+    stations.current.map(station => {
+      const map = maps.current;
+      const marker = new window.google.maps.Marker({
+        position: station,
+        map,
+        title: station.name,
+      });
+      markers.push(marker);
+    })
+  }
 
   const CenterControl = (controlDiv: Element) => {
     // Set CSS for the control border.
