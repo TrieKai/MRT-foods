@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import Head from 'next/head';
 import styled from "styled-components";
 import { Loader } from '@googlemaps/js-api-loader';
 import { GET } from 'utils/request';
@@ -47,6 +48,7 @@ export const Home = () => {
     stations.current.map(station => {
       const map = maps.current;
       const marker = new window.google.maps.Marker({
+        icon: `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|${station.color}`,
         position: station,
         map,
         title: station.name,
@@ -96,6 +98,7 @@ export const Home = () => {
           markers = [];
           const map = maps.current;
           const marker = new window.google.maps.Marker({
+            icon: `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|${station.color}`,
             position: station,
             map,
             title: station.name,
@@ -107,7 +110,12 @@ export const Home = () => {
     })
   }
 
-  return <Map id="map" ref={googlemap}></Map>;
+  return <>
+    <Head>
+      <title>台北捷運美食地圖</title>
+    </Head>
+    <Map id="map" ref={googlemap}></Map>
+  </>;
 };
 
 export default Home;
