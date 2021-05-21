@@ -40,7 +40,7 @@ export const Home = () => {
   }, []);
 
   const getData = async () => {
-    const resp = await GET('api/getStations', { 'line': 'blue,brown' });
+    const resp = await GET('api/getStations', { 'line': 'blue' });
     // 過濾掉重複的捷運站
     stations.current = resp.data.filter((station: StationsVO, i: number, self: StationsVO[]) => {
       return i === self.findIndex(item => item.name === station.name);
@@ -90,7 +90,7 @@ export const Home = () => {
 
   const draw = () => {
     console.log(markers)
-    const shuffledArray = Shuffle(stations.current);
+    const shuffledArray: StationsVO[] = Shuffle(stations.current);
     shuffledArray.forEach((station, i) => {
       new Promise((res, rej) => {
         setTimeout(() => {
@@ -104,10 +104,15 @@ export const Home = () => {
             title: station.name,
           });
           markers.push(marker);
-          res(null)
-        }, 100 * i)
-      })
-    })
+          res(null);
+        }, 100 * i);
+      }).then(async () => {
+        if (i === shuffledArray.length - 1) {
+          const chosenStation = shuffledArray[shuffledArray.length - 1];
+          const resp = await GET('api/getNearbyFoods', { 'lat': chosenStation.lat, 'lng': chosenStation.lng, 'type': '拉麵' });
+        }
+      });
+    });
   }
 
   return <>

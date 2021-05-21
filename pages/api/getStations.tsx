@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { LINE_COLOR } from 'utils/constants';
+import { COLOR, LINE_COLOR } from 'utils/constants';
 
 import { StationsVO } from 'utils/interface/common';
 
@@ -291,6 +291,123 @@ const brownStations: StationsVO[] = [
     lng: 121.57951819641028
   }
 ];
+// 松山新店線
+const greenStations: StationsVO[] = [
+  {
+    name: '松山站',
+    color: LINE_COLOR.green,
+    lat: 25.050070626933447,
+    lng: 121.57771548795866
+  },
+  {
+    name: '南京三民站',
+    color: LINE_COLOR.green,
+    lat: 25.051430185388046,
+    lng: 121.56385931023358
+  },
+  {
+    name: '台北小巨蛋站',
+    color: LINE_COLOR.green,
+    lat: 25.051669082652975,
+    lng: 121.55187891493588
+  },
+  {
+    name: '松江南京站',
+    color: LINE_COLOR.green,
+    lat: 25.051959754324727,
+    lng: 121.53317135476985
+  },
+  {
+    name: '中山站',
+    color: LINE_COLOR.green,
+    lat: 25.05268358144549,
+    lng: 121.52039310897216
+  },
+  {
+    name: '北門站',
+    color: LINE_COLOR.green,
+    lat: 25.049285797014907,
+    lng: 121.51027844152573
+  },
+  {
+    name: '西門站',
+    color: LINE_COLOR.green,
+    lat: 25.042188250376697,
+    lng: 121.50829929059658
+  },
+  {
+    name: '小南門站',
+    color: LINE_COLOR.green,
+    lat: 25.035534474895435,
+    lng: 121.51119269168586
+  },
+  {
+    name: '中正紀念堂站',
+    color: LINE_COLOR.green,
+    lat: 25.03264817980519,
+    lng: 121.51831384123045
+  },
+  {
+    name: '古亭站',
+    color: LINE_COLOR.green,
+    lat: 25.026549401808623,
+    lng: 121.5228139291667
+  },
+  {
+    name: '台電大樓站',
+    color: LINE_COLOR.green,
+    lat: 25.02060569430277,
+    lng: 121.52835530467819
+  },
+  {
+    name: '公館站',
+    color: LINE_COLOR.green,
+    lat: 25.014829783086107,
+    lng: 121.53423135216025
+  },
+  {
+    name: '萬隆站',
+    color: LINE_COLOR.green,
+    lat: 25.001693270534698,
+    lng: 121.53908829235313
+  },
+  {
+    name: '景美站',
+    color: LINE_COLOR.green,
+    lat: 24.992826112051784,
+    lng: 121.54082844056188
+  },
+  {
+    name: '大坪林站',
+    color: LINE_COLOR.green,
+    lat: 24.982895356832252,
+    lng: 121.54135302077407
+  },
+  {
+    name: '七張站',
+    color: LINE_COLOR.green,
+    lat: 24.975785490611194,
+    lng: 121.542908256375
+  },
+  {
+    name: '新店區公所站',
+    color: LINE_COLOR.green,
+    lat: 24.967855671616423,
+    lng: 121.54152806648686
+  },
+  {
+    name: '新店站',
+    color: LINE_COLOR.green,
+    lat: 24.958194805512985,
+    lng: 121.53807183975766
+  },
+  {
+    name: '新店站',
+    color: LINE_COLOR.green,
+    lat: 24.958194805512985,
+    lng: 121.53807183975766
+  }
+];
 
 const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
   console.log(req.query);
@@ -298,11 +415,14 @@ const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
     const lines = req.query.line as string;
     const colors = lines.split(',');
     let result: StationsVO[] = [];
-    if (colors.indexOf('blue') !== -1) {
+    if (colors.indexOf(COLOR.blue) !== -1) {
       result = result.concat(blueStations);
     }
-    if (colors.indexOf('brown') !== -1) {
+    if (colors.indexOf(COLOR.brown) !== -1) {
       result = result.concat(brownStations);
+    }
+    if (colors.indexOf(COLOR.green) !== -1) {
+      result = result.concat(greenStations);
     }
     res.status(200).json({ data: result });
   } else {
