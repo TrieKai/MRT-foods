@@ -5,6 +5,7 @@ import { Loader } from '@googlemaps/js-api-loader';
 import { GET } from 'utils/request';
 import { Shuffle } from 'utils/common';
 import Modal from 'components/modal';
+import RadioBtn from 'components/radioButton';
 
 import { StationsVO } from 'utils/interface/common'
 
@@ -12,13 +13,19 @@ const Map = styled.div`
   height: 100%;
 `;
 
-const StyledStation = styled.span`
+const StyledStepTitle = styled.div`
+  font-size: 2rem;
+`;
+
+const StyledBold = styled.span`
   margin: 0 0.5rem;
   font-weight: bold;
 `;
 
-const StyledModalContent = styled.div`
-  font-size: 2rem;
+const StyledRadioBox = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  width: 90%;
 `;
 
 const StyledBtnBox = styled.div`
@@ -41,7 +48,7 @@ const StyledPrevBtn = styled.a`
   }
 `;
 
-const StyledNextBtn = styled.a`
+const StyledNextBtn = styled.a<{ disable?: boolean }>`
   margin: 0 .5rem;
   padding: 0px 2rem;
   display: inline-block;
@@ -51,7 +58,7 @@ const StyledNextBtn = styled.a`
   color: white;
   background: rgb(0, 112, 243);
   box-shadow: rgb(0 118 255 / 39%) 0px 4px 14px 0px;
-  cursor: pointer;
+  cursor: ${props => props.disable ? 'not-allowed' : 'pointer'};
   &:hover {
     background: rgba(0, 118, 255, 0.9);
     box-shadow: rgb(0 118 255 / 23%) 0px 6px 20px;
@@ -65,7 +72,9 @@ export const Home = () => {
   const stations = useRef<StationsVO[]>([]);
   const chosenStations = useRef<StationsVO>(null);
   const [showModal, setShowModal] = useState(false);
-  const drawStatus = useRef<boolean>(false); // 抽籤的狀態
+  const step = useRef<number>(0);
+  const [foodType, setFoodType] = useState<string[]>([]);
+  const [selectedFood, setSelectedFood] = useState<string>(null);
 
   useEffect(() => {
     const loader = new Loader({
@@ -137,8 +146,8 @@ export const Home = () => {
   }
 
   const draw = () => {
-    if (drawStatus.current) return;
-    drawStatus.current = true;
+    if (step.current !== 0) return;
+    step.current = 1;
     console.log(markers.current)
     const shuffledArray: StationsVO[] = Shuffle(stations.current);
     shuffledArray.forEach((station, i) => {
@@ -158,7 +167,6 @@ export const Home = () => {
         }, 100 * i);
       }).then(() => {
         if (i === shuffledArray.length - 1) {
-          drawStatus.current = false;
           chosenStations.current = shuffledArray[shuffledArray.length - 1];
           setShowModal(true);
         }
@@ -166,9 +174,29 @@ export const Home = () => {
     });
   }
 
-  const nearbySearch = async () => {
-    console.log('nearbySearch')
-    const resp = await GET('api/getNearbyFoods', { 'lat': chosenStations.current.lat, 'lng': chosenStations.current.lng, 'type': '拉麵' });
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedFood(null);
+    step.current = 0;
+  }
+
+  const reDraw = () => {
+    closeModal();
+    draw();
+  }
+
+  const step2 = async () => {
+    step.current = 2;
+    const resp = await GET('api/getFoodType', null);
+    console.log(resp)
+    setFoodType(resp.data);
+  }
+
+  const step3 = async () => {
+    if (!selectedFood) return;
+    // step.current = 3;
+    console.log(selectedFood)
+    const resp = await GET('api/getNearbyFoods', { 'lat': chosenStations.current.lat, 'lng': chosenStations.current.lng, 'type': selectedFood });
   }
 
   return <>
@@ -176,15 +204,26 @@ export const Home = () => {
       <title>台北捷運美食地圖</title>
     </Head>
     <Map id="map" ref={googlemap}></Map>
-    <Modal onClose={() => setShowModal(false)} show={showModal}>
-      <StyledModalContent>恭喜骰到<StyledStation>{chosenStations.current?.name}</StyledStation>！</StyledModalContent>
-      <StyledBtnBox>
-        <StyledPrevBtn onClick={() => {
-          setShowModal(false);
-          draw();
-        }}>重新骰</StyledPrevBtn>
-        <StyledNextBtn onClick={nearbySearch}>下一步</StyledNextBtn>
-      </StyledBtnBox>
+    <Modal onClose={() => closeModal()} show={showModal}>
+      {step.current === 1 && <>
+        <StyledStepTitle>
+          恭喜骰到<StyledBold>{chosenStations.current?.name}</StyledBold>!
+        </StyledStepTitle>
+        <StyledBtnBox>
+          <StyledPrevBtn onClick={reDraw}>重新骰</StyledPrevBtn>
+          <StyledNextBtn onClick={step2}>下一步</StyledNextBtn>
+        </StyledBtnBox>
+      </>}
+      {step.current === 2 && <>
+        <StyledStepTitle>選擇一個想吃的種類吧!</StyledStepTitle>
+        <StyledRadioBox>
+          <RadioBtn name={'line'} texts={foodType} onChecked={(type: string) => { setSelectedFood(type) }}></RadioBtn>
+        </StyledRadioBox>
+        <StyledBtnBox>
+          <StyledPrevBtn onClick={reDraw}>重新骰</StyledPrevBtn>
+          <StyledNextBtn disable={!selectedFood} onClick={step3}>GO!</StyledNextBtn>
+        </StyledBtnBox>
+      </>}
     </Modal>
   </>;
 };

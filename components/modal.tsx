@@ -3,22 +3,20 @@ import ReactDOM from "react-dom";
 import styled from "styled-components";
 
 const StyledModalBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   width: 100%;
   height: 100%;
+  text-align: center;
 `;
 
 const StyledModal = styled.div`
-  background: white;
+  display: flex;
+  align-items: center;
+  padding: 15px;
   width: 80%;
   max-width: 500px;
-  height: 300px;
+  min-height: 300px;
+  background: white;
   border-radius: 15px;
-  padding: 15px;
-  text-align: center;
 `;
 
 const StyledModalOverlay = styled.div`

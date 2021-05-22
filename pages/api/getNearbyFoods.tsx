@@ -5,7 +5,7 @@ import { PlacesNearbyRanking } from "@googlemaps/google-maps-services-js/dist/pl
 
 const GetNearbyFoods = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log(req.query);
-  const types = [FOOD_TYPE.ramen];
+  const types = Object.keys(FOOD_TYPE).map(key => FOOD_TYPE[key]);
   const lat = req.query.lat as string;
   const lng = req.query.lng as string;
   const keyword = req.query.type as string;
@@ -39,11 +39,14 @@ const GetNearbyFoods = async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(500).json({ error: e });
         reject();
       });
-    })
+    });
   }
 
   if (types.indexOf(req.query.type as string) !== -1) {
     await nearbySearch();
+  } else {
+    res.status(500).json({ error: '參數錯誤' });
+    return;
   }
 }
 
