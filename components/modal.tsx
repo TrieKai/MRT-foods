@@ -20,6 +20,7 @@ const StyledModal = styled.div`
   padding: 15px;
   text-align: center;
 `;
+
 const StyledModalOverlay = styled.div`
   position: absolute;
   top: 0;

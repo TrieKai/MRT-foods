@@ -60,11 +60,12 @@ const StyledNextBtn = styled.a`
 
 export const Home = () => {
   const googlemap = useRef(null);
-  let markers: google.maps.Marker[] = [];
+  const markers = useRef<google.maps.Marker[]>([]);
   const maps = useRef<google.maps.Map>(null);
   const stations = useRef<StationsVO[]>([]);
   const chosenStations = useRef<StationsVO>(null);
   const [showModal, setShowModal] = useState(false);
+  const drawStatus = useRef<boolean>(false); // 抽籤的狀態
 
   useEffect(() => {
     const loader = new Loader({
@@ -102,7 +103,7 @@ export const Home = () => {
         map,
         title: station.name,
       });
-      markers.push(marker);
+      markers.current.push(marker);
     })
   }
 
@@ -132,19 +133,19 @@ export const Home = () => {
     controlUI.appendChild(controlText);
 
     // Setup the click event listeners
-    controlUI.addEventListener("click", () => {
-      draw();
-    });
+    controlUI.addEventListener("click", draw);
   }
 
   const draw = () => {
-    console.log(markers)
+    if (drawStatus.current) return;
+    drawStatus.current = true;
+    console.log(markers.current)
     const shuffledArray: StationsVO[] = Shuffle(stations.current);
     shuffledArray.forEach((station, i) => {
       new Promise((res, rej) => {
         setTimeout(() => {
-          markers.forEach(marker => marker.setMap(null)); // clear markers
-          markers = [];
+          markers.current.forEach(marker => marker.setMap(null)); // clear markers
+          markers.current = [];
           const map = maps.current;
           const marker = new window.google.maps.Marker({
             icon: `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|${station.color}`,
@@ -152,11 +153,12 @@ export const Home = () => {
             map,
             title: station.name,
           });
-          markers.push(marker);
+          markers.current.push(marker);
           res(null);
         }, 100 * i);
-      }).then(async () => {
+      }).then(() => {
         if (i === shuffledArray.length - 1) {
+          drawStatus.current = false;
           chosenStations.current = shuffledArray[shuffledArray.length - 1];
           setShowModal(true);
         }
@@ -164,9 +166,9 @@ export const Home = () => {
     });
   }
 
-  const nearbySearch = () => {
+  const nearbySearch = async () => {
     console.log('nearbySearch')
-    // const resp = await GET('api/getNearbyFoods', { 'lat': chosenStations.current.lat, 'lng': chosenStations.current.lng, 'type': '拉麵' });
+    const resp = await GET('api/getNearbyFoods', { 'lat': chosenStations.current.lat, 'lng': chosenStations.current.lng, 'type': '拉麵' });
   }
 
   return <>
@@ -177,7 +179,10 @@ export const Home = () => {
     <Modal onClose={() => setShowModal(false)} show={showModal}>
       <StyledModalContent>恭喜骰到<StyledStation>{chosenStations.current?.name}</StyledStation>！</StyledModalContent>
       <StyledBtnBox>
-        <StyledPrevBtn onClick={nearbySearch}>重新骰</StyledPrevBtn>
+        <StyledPrevBtn onClick={() => {
+          setShowModal(false);
+          draw();
+        }}>重新骰</StyledPrevBtn>
         <StyledNextBtn onClick={nearbySearch}>下一步</StyledNextBtn>
       </StyledBtnBox>
     </Modal>
