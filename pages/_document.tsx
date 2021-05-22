@@ -1,4 +1,4 @@
-import Document, { DocumentContext } from 'next/document';
+import Document, { DocumentContext, Html, Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheet } from 'styled-components';
 
 export default class MyDocument extends Document {
@@ -26,5 +26,19 @@ export default class MyDocument extends Document {
     } finally {
       sheet.seal()
     }
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+          {/* Below we add the modal wrapper */}
+          <div id="modal-root"></div>
+        </body>
+      </Html>
+    );
   }
 }

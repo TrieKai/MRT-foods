@@ -14,3 +14,10 @@ body {
 #__next {
   height: 100%;
 }
+
+a {
+  -webkit-text-decoration: none;
+  text-decoration        : none;
+  -webkit-transition     : color 0.2s ease;
+  transition             : color 0.2s ease;
+}
