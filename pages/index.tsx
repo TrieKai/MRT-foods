@@ -4,16 +4,20 @@ import styled from "styled-components";
 import { Loader } from '@googlemaps/js-api-loader';
 import { GET } from 'utils/request';
 import { Shuffle } from 'utils/common';
-import Modal from 'components/modal';
-import RadioBtn from 'components/radioButton';
+import Modal from 'components/modal-component';
+import RadioBtn from 'components/radioButton-component';
+import CardList from 'components/cardList-component';
+import RatingComponent from 'components/rating-component';
 
 import { StationsVO } from 'utils/interface/common'
+import { Place } from '@googlemaps/google-maps-services-js';
 
 const Map = styled.div`
   height: 100%;
 `;
 
 const StyledStepTitle = styled.div`
+  text-align: center;
   font-size: 2rem;
 `;
 
@@ -30,6 +34,7 @@ const StyledRadioBox = styled.div`
 
 const StyledBtnBox = styled.div`
   margin-top: 30px;
+  text-align: center;
 `;
 
 const StyledPrevBtn = styled.a`
@@ -65,6 +70,10 @@ const StyledNextBtn = styled.a<{ disable?: boolean }>`
   }
 `;
 
+const StyledCardListWrapper = styled.div`
+  height: inherit;
+`;
+
 export const Home = () => {
   const googlemap = useRef(null);
   const markers = useRef<google.maps.Marker[]>([]);
@@ -72,9 +81,11 @@ export const Home = () => {
   const stations = useRef<StationsVO[]>([]);
   const chosenStations = useRef<StationsVO>(null);
   const [showModal, setShowModal] = useState(false);
-  const step = useRef<number>(0);
+  const disable = useRef<boolean>(false); // Disable for click draw btn
+  const [step, setStep] = useState<number>(0);
   const [foodType, setFoodType] = useState<string[]>([]);
-  const [selectedFood, setSelectedFood] = useState<string>(null);
+  const [selectedFoodType, setSelectedFoodType] = useState<string>(null);
+  const [placeList, setPlaceList] = useState<Place[]>([]);
 
   useEffect(() => {
     const loader = new Loader({
@@ -99,7 +110,7 @@ export const Home = () => {
   }, []);
 
   const getData = async () => {
-    const resp = await GET('api/getStations', { 'line': 'blue' });
+    const resp = await GET('api/getStations', { 'line': 'blue,brown,green' });
     // 過濾掉重複的捷運站
     stations.current = resp.data.filter((station: StationsVO, i: number, self: StationsVO[]) => {
       return i === self.findIndex(item => item.name === station.name);
@@ -146,8 +157,9 @@ export const Home = () => {
   }
 
   const draw = () => {
-    if (step.current !== 0) return;
-    step.current = 1;
+    if (disable.current) return;
+    disable.current = true;
+    setStep(1);
     console.log(markers.current)
     const shuffledArray: StationsVO[] = Shuffle(stations.current);
     shuffledArray.forEach((station, i) => {
@@ -169,6 +181,7 @@ export const Home = () => {
         if (i === shuffledArray.length - 1) {
           chosenStations.current = shuffledArray[shuffledArray.length - 1];
           setShowModal(true);
+          disable.current = false;
         }
       });
     });
@@ -176,8 +189,9 @@ export const Home = () => {
 
   const closeModal = () => {
     setShowModal(false);
-    setSelectedFood(null);
-    step.current = 0;
+    setSelectedFoodType(null);
+    setStep(0);
+    console.log('closeModal', step)
   }
 
   const reDraw = () => {
@@ -186,17 +200,18 @@ export const Home = () => {
   }
 
   const step2 = async () => {
-    step.current = 2;
+    setStep(2);
     const resp = await GET('api/getFoodType', null);
     console.log(resp)
     setFoodType(resp.data);
   }
 
   const step3 = async () => {
-    if (!selectedFood) return;
-    // step.current = 3;
-    console.log(selectedFood)
-    const resp = await GET('api/getNearbyFoods', { 'lat': chosenStations.current.lat, 'lng': chosenStations.current.lng, 'type': selectedFood });
+    if (!selectedFoodType) return;
+    setStep(3);
+    const resp: { data: Place[] } = await GET('api/getNearbyFoods', { 'lat': chosenStations.current.lat, 'lng': chosenStations.current.lng, 'type': selectedFoodType });
+    console.log(resp.data)
+    setPlaceList(resp.data);
   }
 
   return <>
@@ -205,7 +220,7 @@ export const Home = () => {
     </Head>
     <Map id="map" ref={googlemap}></Map>
     <Modal onClose={() => closeModal()} show={showModal}>
-      {step.current === 1 && <>
+      {step === 1 && <>
         <StyledStepTitle>
           恭喜骰到<StyledBold>{chosenStations.current?.name}</StyledBold>!
         </StyledStepTitle>
@@ -214,15 +229,28 @@ export const Home = () => {
           <StyledNextBtn onClick={step2}>下一步</StyledNextBtn>
         </StyledBtnBox>
       </>}
-      {step.current === 2 && <>
+      {step === 2 && <>
         <StyledStepTitle>選擇一個想吃的種類吧!</StyledStepTitle>
         <StyledRadioBox>
-          <RadioBtn name={'line'} texts={foodType} onChecked={(type: string) => { setSelectedFood(type) }}></RadioBtn>
+          <RadioBtn name={'line'} texts={foodType} onChecked={(type: string) => { setSelectedFoodType(type) }}></RadioBtn>
         </StyledRadioBox>
         <StyledBtnBox>
           <StyledPrevBtn onClick={reDraw}>重新骰</StyledPrevBtn>
-          <StyledNextBtn disable={!selectedFood} onClick={step3}>GO!</StyledNextBtn>
+          <StyledNextBtn disable={!selectedFoodType} onClick={step3}>GO!</StyledNextBtn>
         </StyledBtnBox>
+      </>}
+      {step === 3 && <>
+        <StyledCardListWrapper>
+          <CardList list={placeList.map(place => <>
+            <b>{place.name}</b>
+            <RatingComponent rating={place.rating} ratingNum={place.user_ratings_total} />
+            <div>{place.vicinity}</div>
+          </>)} onClick={() => { }} />
+          <StyledBtnBox>
+            <StyledPrevBtn onClick={() => { setStep(2); setSelectedFoodType(null); }}>返回</StyledPrevBtn>
+            <StyledPrevBtn onClick={reDraw}>重新骰</StyledPrevBtn>
+          </StyledBtnBox>
+        </StyledCardListWrapper>
       </>}
     </Modal>
   </>;

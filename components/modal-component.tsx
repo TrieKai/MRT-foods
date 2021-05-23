@@ -3,9 +3,12 @@ import ReactDOM from "react-dom";
 import styled from "styled-components";
 
 const StyledModalBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  text-align: center;
 `;
 
 const StyledModal = styled.div`
@@ -14,9 +17,11 @@ const StyledModal = styled.div`
   padding: 15px;
   width: 80%;
   max-width: 500px;
+  max-height: 80%;
   min-height: 300px;
   background: white;
   border-radius: 15px;
+  overflow-y: auto;
 `;
 
 const StyledModalOverlay = styled.div`
@@ -26,6 +31,7 @@ const StyledModalOverlay = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);

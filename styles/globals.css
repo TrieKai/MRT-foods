@@ -20,4 +20,5 @@ a {
   text-decoration        : none;
   -webkit-transition     : color 0.2s ease;
   transition             : color 0.2s ease;
+  cursor                 : pointer;
 }
