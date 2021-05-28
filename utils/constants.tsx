@@ -1,10 +1,10 @@
-export const COLOR = {
-  blue: 'blue',
-  brown: 'brown',
-  green: 'green',
-  red: 'red',
-  yellow: 'yellow',
-  orange: 'orange',
+export enum COLOR {
+  blue = 'blue',
+  brown = 'brown',
+  green = 'green',
+  red = 'red',
+  yellow = 'yellow',
+  orange = 'orange',
 };
 
 export const LINE_COLOR = {

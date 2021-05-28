@@ -160,7 +160,6 @@ export const Home = () => {
     if (disable.current) return;
     disable.current = true;
     setStep(1);
-    console.log(markers.current)
     const shuffledArray: StationsVO[] = Shuffle(stations.current);
     shuffledArray.forEach((station, i) => {
       new Promise((res, rej) => {
@@ -191,7 +190,6 @@ export const Home = () => {
     setShowModal(false);
     setSelectedFoodType(null);
     setStep(0);
-    console.log('closeModal', step)
   }
 
   const reDraw = () => {
@@ -201,6 +199,8 @@ export const Home = () => {
 
   const step2 = async () => {
     setStep(2);
+    setSelectedFoodType(null);
+    setPlaceList([]);
     const resp = await GET('api/getFoodType', null);
     console.log(resp)
     setFoodType(resp.data);
@@ -247,7 +247,7 @@ export const Home = () => {
             <div>{place.vicinity}</div>
           </>)} onClick={() => { }} />
           <StyledBtnBox>
-            <StyledPrevBtn onClick={() => { setStep(2); setSelectedFoodType(null); }}>返回</StyledPrevBtn>
+            <StyledPrevBtn onClick={step2}>返回</StyledPrevBtn>
             <StyledPrevBtn onClick={reDraw}>重新骰</StyledPrevBtn>
           </StyledBtnBox>
         </StyledCardListWrapper>

@@ -401,12 +401,171 @@ const greenStations: StationsVO[] = [
     lat: 24.958194805512985,
     lng: 121.53807183975766
   },
+];
+// 淡水信義線
+const redStations: StationsVO[] = [
   {
-    name: '新店站',
-    color: LINE_COLOR.green,
-    lat: 24.958194805512985,
-    lng: 121.53807183975766
-  }
+    name: '象山站',
+    color: LINE_COLOR.red,
+    lat: 25.032825128273725,
+    lng: 121.57008158219647
+  },
+  {
+    name: '台北101/世貿站',
+    color: LINE_COLOR.red,
+    lat: 25.033027380630543,
+    lng: 121.56275992044338
+  },
+  {
+    name: '信義安和站',
+    color: LINE_COLOR.red,
+    lat: 25.03327288829257,
+    lng: 121.5529660062519
+  },
+  {
+    name: '大安站',
+    color: LINE_COLOR.red,
+    lat: 25.03299167697042,
+    lng: 121.54358989283449
+  },
+  {
+    name: '大安森林公園站',
+    color: LINE_COLOR.red,
+    lat: 25.03350773426659,
+    lng: 121.53521567846754
+  },
+  {
+    name: '東門站',
+    color: LINE_COLOR.red,
+    lat: 25.03387475401417,
+    lng: 121.52871277178404
+  },
+  {
+    name: '中正紀念堂站',
+    color: LINE_COLOR.red,
+    lat: 25.03264817980519,
+    lng: 121.51831384123045
+  },
+  {
+    name: '台大醫院站',
+    color: LINE_COLOR.red,
+    lat: 25.042075328941674,
+    lng: 121.51627896056166
+  },
+  {
+    name: '台北車站',
+    color: LINE_COLOR.red,
+    lat: 25.04780473287673,
+    lng: 121.51701924019679
+  },
+  {
+    name: '中山站',
+    color: LINE_COLOR.red,
+    lat: 25.05268358144549,
+    lng: 121.52039310897216
+  },
+  {
+    name: '雙連站',
+    color: LINE_COLOR.red,
+    lat: 25.057779584169747,
+    lng: 121.52067048865834
+  },
+  {
+    name: '民權西路站',
+    color: LINE_COLOR.red,
+    lat: 25.062862715790406,
+    lng: 121.51972537035577
+  },
+  {
+    name: '圓山站',
+    color: LINE_COLOR.red,
+    lat: 25.071350100406764,
+    lng: 121.52012218573611
+  },
+  {
+    name: '劍潭站',
+    color: LINE_COLOR.red,
+    lat: 25.08427769391862,
+    lng: 121.52497575283152
+  },
+  {
+    name: '士林站',
+    color: LINE_COLOR.red,
+    lat: 25.093453961610564,
+    lng: 121.52621681911934
+  },
+  {
+    name: '芝山站',
+    color: LINE_COLOR.red,
+    lat: 25.102937976982968,
+    lng: 121.5225224983447
+  },
+  {
+    name: '明德站',
+    color: LINE_COLOR.red,
+    lat: 25.109830877004985,
+    lng: 121.51875139155167
+  },
+  {
+    name: '石牌站',
+    color: LINE_COLOR.red,
+    lat: 25.114398327897735,
+    lng: 121.51561381230103
+  },
+  {
+    name: '唭哩岸站',
+    color: LINE_COLOR.red,
+    lat: 25.120830773984917,
+    lng: 121.5061641420625
+  },
+  {
+    name: '奇岩站',
+    color: LINE_COLOR.red,
+    lat: 25.125535665768993,
+    lng: 121.50111224928665
+  },
+  {
+    name: '北投站',
+    color: LINE_COLOR.red,
+    lat: 25.13177875723778,
+    lng: 121.49864435103028
+  },
+  {
+    name: '復興崗站',
+    color: LINE_COLOR.red,
+    lat: 25.13763931179282,
+    lng: 121.48540426049829
+  },
+  {
+    name: '忠義站',
+    color: LINE_COLOR.red,
+    lat: 25.1309932785213,
+    lng: 121.4732100593194
+  },
+  {
+    name: '關渡站',
+    color: LINE_COLOR.red,
+    lat: 25.125628754540497,
+    lng: 121.46720007932807
+  },
+  {
+    name: '竹圍站',
+    color: LINE_COLOR.red,
+    lat: 25.1369123511988,
+    lng: 121.45952964135354
+  },
+  {
+    name: '紅樹林站',
+    color: LINE_COLOR.red,
+    lat: 25.154730634121552,
+    lng: 121.45883047828409
+  },
+  {
+    name: '淡水站',
+    color: LINE_COLOR.red,
+    lat: 25.167708875723857,
+    lng: 121.4456741278879
+  },
 ];
 
 const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
@@ -423,6 +582,9 @@ const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
     }
     if (colors.indexOf(COLOR.green) !== -1) {
       result = result.concat(greenStations);
+    }
+    if (colors.indexOf(COLOR.red) !== -1) {
+      result = result.concat(redStations);
     }
     res.status(200).json({ data: result });
   } else {
