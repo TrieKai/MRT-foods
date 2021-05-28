@@ -16,14 +16,14 @@ export const LINE_COLOR = {
   [COLOR.orange]: 'F8B61C',
 };
 
-export const LINE_NAME = {
-  [COLOR.blue]: '板南線',
-  [COLOR.brown]: '文湖線',
-  [COLOR.green]: '松山新店線',
-  [COLOR.red]: '淡水信義線',
-  [COLOR.yellow]: '環狀線',
-  [COLOR.orange]: '中和新蘆線',
-};
+export const LINE_NAME = [
+  { key: COLOR.blue, name: '板南線' },
+  { key: COLOR.brown, name: '文湖線' },
+  { key: COLOR.green, name: '松山新店線' },
+  { key: COLOR.red, name: '淡水信義線' },
+  // { key: COLOR.yellow, name: '環狀線' },
+  // { key: COLOR.orange, name: '中和新蘆線' }
+];
 
 export const FOOD_TYPE = {
   ramen: '拉麵',

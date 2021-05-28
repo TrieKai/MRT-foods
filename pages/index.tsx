@@ -5,12 +5,33 @@ import { Loader } from '@googlemaps/js-api-loader';
 import { GET } from 'utils/request';
 import { Shuffle } from 'utils/common';
 import Modal from 'components/modal-component';
+import CheckBox from 'components/checkbox-component';
 import RadioBtn from 'components/radioButton-component';
 import CardList from 'components/cardList-component';
 import RatingComponent from 'components/rating-component';
 
 import { StationsVO } from 'utils/interface/common'
 import { Place } from '@googlemaps/google-maps-services-js';
+
+const FilterMap = styled.button`
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  margin: 10px;
+  padding: 0px;
+  width: 40px;
+  height: 40px;
+  background: none rgb(255, 255, 255);
+  border: 0px;
+  text-transform: none;
+  appearance: none;
+  user-select: none;
+  border-radius: 2px;
+  box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px -1px;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 1;
+`;
 
 const Map = styled.div`
   height: 100%;
@@ -78,12 +99,14 @@ export const Home = () => {
   const googlemap = useRef(null);
   const markers = useRef<google.maps.Marker[]>([]);
   const maps = useRef<google.maps.Map>(null);
+  const [lines, setLines] = useState<{ key: string; name: string; checked: boolean; }[]>([]);
   const stations = useRef<StationsVO[]>([]);
   const chosenStations = useRef<StationsVO>(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const disable = useRef<boolean>(false); // Disable for click draw btn
   const [step, setStep] = useState<number>(0);
-  const [foodType, setFoodType] = useState<string[]>([]);
+  const [foodType, setFoodType] = useState<{ name: string; checked: boolean; }[]>([]);
   const [selectedFoodType, setSelectedFoodType] = useState<string>(null);
   const [placeList, setPlaceList] = useState<Place[]>([]);
 
@@ -100,7 +123,7 @@ export const Home = () => {
         streetViewControl: false,
       });
 
-      getData(); // Get stations info
+      getStationName(); // Get all MRT lines
 
       // Customer button on the top center
       const centerControlDiv = document.createElement("div");
@@ -109,8 +132,17 @@ export const Home = () => {
     });
   }, []);
 
-  const getData = async () => {
-    const resp = await GET('api/getStations', { 'line': 'blue,brown,green' });
+  const getStationName = async () => {
+    const resp = await GET('api/getStationName', null);
+    setLines(resp.data.map(line => { return { ...line, checked: true }; }));
+    const allLines = resp.data.map(line => line.key);
+    getStationInfo(allLines); // Get stations info
+  }
+
+  const getStationInfo = async (lines: string) => {
+    markers.current.forEach(marker => marker.setMap(null)); // clear markers
+    markers.current = [];
+    const resp = await GET('api/getStations', { 'line': lines });
     // 過濾掉重複的捷運站
     stations.current = resp.data.filter((station: StationsVO, i: number, self: StationsVO[]) => {
       return i === self.findIndex(item => item.name === station.name);
@@ -124,7 +156,7 @@ export const Home = () => {
         title: station.name,
       });
       markers.current.push(marker);
-    })
+    });
   }
 
   const CenterControl = (controlDiv: Element) => {
@@ -175,7 +207,7 @@ export const Home = () => {
           });
           markers.current.push(marker);
           res(null);
-        }, 100 * i);
+        }, 60 * i);
       }).then(() => {
         if (i === shuffledArray.length - 1) {
           chosenStations.current = shuffledArray[shuffledArray.length - 1];
@@ -202,8 +234,8 @@ export const Home = () => {
     setSelectedFoodType(null);
     setPlaceList([]);
     const resp = await GET('api/getFoodType', null);
-    console.log(resp)
-    setFoodType(resp.data);
+    console.log(resp.data)
+    setFoodType(resp.data.map(type => { return { name: type, checked: false }; }));
   }
 
   const step3 = async () => {
@@ -218,6 +250,33 @@ export const Home = () => {
     <Head>
       <title>台北捷運美食地圖</title>
     </Head>
+    <FilterMap onClick={() => { setShowFilterModal(true); }}>
+      <svg viewBox="0 0 64 64" width="30" height="30">
+        <path
+          d="M56 13v6a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h46a1 1 0 0 1 1 1zm-1 15H9a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h46a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1zm0 16H9a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h46a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1z"
+          fill="#808080">
+        </path>
+      </svg>
+    </FilterMap>
+    <Modal
+      onClose={() => {
+        const selectedLines = lines.filter(line => line.checked).map(line => line.key).toString();
+        getStationInfo(selectedLines);
+        setShowFilterModal(false);
+      }}
+      show={showFilterModal}
+    >
+      <StyledStepTitle>台北捷運</StyledStepTitle>
+      <CheckBox
+        name={'line'}
+        data={lines.map(line => { return { text: line.name, checked: line.checked }; })}
+        onChange={(line: string) => {
+          const selectedLine = lines.find(item => item.name === line);
+          selectedLine.checked = !selectedLine.checked;
+          setLines([...lines]);
+        }}
+      />
+    </Modal>
     <Map id="map" ref={googlemap}></Map>
     <Modal onClose={() => closeModal()} show={showModal}>
       {step === 1 && <>
@@ -232,7 +291,16 @@ export const Home = () => {
       {step === 2 && <>
         <StyledStepTitle>選擇一個想吃的種類吧!</StyledStepTitle>
         <StyledRadioBox>
-          <RadioBtn name={'line'} texts={foodType} onChecked={(type: string) => { setSelectedFoodType(type) }}></RadioBtn>
+          <RadioBtn
+            name={'food'}
+            data={foodType.map(item => { return { text: item.name, checked: item.checked }; })}
+            onChange={(type: string) => {
+              const selectedFoodType = foodType.find(item => item.name === type);
+              selectedFoodType.checked = !selectedFoodType.checked;
+              setFoodType([...foodType]);
+              setSelectedFoodType(type);
+            }}
+          />
         </StyledRadioBox>
         <StyledBtnBox>
           <StyledPrevBtn onClick={reDraw}>重新骰</StyledPrevBtn>

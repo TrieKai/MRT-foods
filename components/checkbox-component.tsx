@@ -20,7 +20,7 @@ const StyledText = styled.span`
   transition: box-shadow 0.2s ease 0s;
 `;
 
-const StyledRadioBtn = styled.input`
+const StyledCheckbox = styled.input`
   display: none;
 
   &:checked + ${StyledText} {
@@ -31,7 +31,7 @@ const StyledRadioBtn = styled.input`
   }
 `;
 
-interface RadioBtnProps {
+interface CheckboxProps {
   name: string
   data: {
     text: string
@@ -40,15 +40,15 @@ interface RadioBtnProps {
   onChange: Function
 }
 
-const RadioBtn: React.FC<RadioBtnProps> = ({ name, data, onChange }) => {
+const Checkbox: React.FC<CheckboxProps> = ({ name, data, onChange }) => {
   return <>
     {data.map((item, i) =>
       <StyledLabel key={i}>
-        <StyledRadioBtn type='radio' name={name} checked={item.checked} onChange={() => { onChange(item.text) }} />
+        <StyledCheckbox type='checkbox' name={name} checked={item.checked} onChange={() => { onChange(item.text) }} />
         <StyledText>{item.text}</StyledText>
       </StyledLabel>
     )}
   </>
 }
 
-export default RadioBtn;
+export default Checkbox;

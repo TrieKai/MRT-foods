@@ -588,7 +588,7 @@ const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
     }
     res.status(200).json({ data: result });
   } else {
-    res.status(200).json({ data: blueStations.concat(brownStations) });
+    res.status(200).json({ data: [] });
   }
 }
 
