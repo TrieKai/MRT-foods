@@ -21,7 +21,7 @@ export const LINE_NAME = [
   { key: COLOR.brown, name: '文湖線' },
   { key: COLOR.green, name: '松山新店線' },
   { key: COLOR.red, name: '淡水信義線' },
-  // { key: COLOR.yellow, name: '環狀線' },
+  { key: COLOR.yellow, name: '環狀線' },
   // { key: COLOR.orange, name: '中和新蘆線' }
 ];
 

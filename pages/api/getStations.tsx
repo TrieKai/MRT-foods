@@ -567,6 +567,93 @@ const redStations: StationsVO[] = [
     lng: 121.4456741278879
   },
 ];
+// 環狀線
+const yellowStations: StationsVO[] = [
+  {
+    name: '大坪林站',
+    color: LINE_COLOR.yellow,
+    lat: 24.982895356832252,
+    lng: 121.54135302077407
+  },
+  {
+    name: '十四張站',
+    color: LINE_COLOR.yellow,
+    lat: 24.984397434759156,
+    lng: 121.52768084979918
+  },
+  {
+    name: '秀朗橋站',
+    color: LINE_COLOR.yellow,
+    lat: 24.990289544543856,
+    lng: 121.52501751336298
+  },
+  {
+    name: '景平站',
+    color: LINE_COLOR.yellow,
+    lat: 24.99210586665548,
+    lng: 121.51638698808141
+  },
+  {
+    name: '景安站',
+    color: LINE_COLOR.yellow,
+    lat: 24.993858132840995,
+    lng: 121.504787281015
+  },
+  {
+    name: '中和站',
+    color: LINE_COLOR.yellow,
+    lat: 25.002348543667882,
+    lng: 121.49598010461142
+  },
+  {
+    name: '橋和站',
+    color: LINE_COLOR.yellow,
+    lat: 25.004598417727724,
+    lng: 121.49049317248435
+  },
+  {
+    name: '中原站',
+    color: LINE_COLOR.yellow,
+    lat: 25.008399774800093,
+    lng: 121.48431041432912
+  },
+  {
+    name: '板新站',
+    color: LINE_COLOR.yellow,
+    lat: 25.014418033514403,
+    lng: 121.4722727607481
+  },
+  {
+    name: '板橋站(環狀線)',
+    color: LINE_COLOR.yellow,
+    lat: 25.015230563220758,
+    lng: 121.46455772689588
+  },
+  {
+    name: '新埔民生站',
+    color: LINE_COLOR.yellow,
+    lat: 25.026101660959515,
+    lng: 121.46665380432984
+  },
+  {
+    name: '頭前庄站',
+    color: LINE_COLOR.yellow,
+    lat: 25.03984931941612,
+    lng: 121.46052726778613
+  },
+  {
+    name: '幸福站',
+    color: LINE_COLOR.yellow,
+    lat: 25.049967572966764,
+    lng: 121.45996087437057
+  },
+  {
+    name: '桃園機場捷運 A3 新北產業園區站',
+    color: LINE_COLOR.yellow,
+    lat: 25.061316094805903,
+    lng: 121.45974305113327
+  },
+];
 
 const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
   console.log(req.query);
@@ -585,6 +672,9 @@ const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
     }
     if (colors.indexOf(COLOR.red) !== -1) {
       result = result.concat(redStations);
+    }
+    if (colors.indexOf(COLOR.yellow) !== -1) {
+      result = result.concat(yellowStations);
     }
     res.status(200).json({ data: result });
   } else {
