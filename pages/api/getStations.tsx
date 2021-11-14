@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { COLOR, LINE_COLOR } from 'utils/constants';
+import { NextApiRequest, NextApiResponse } from 'next'
+import { COLOR, LINE_COLOR } from 'utils/constants'
 
-import { StationsVO } from 'utils/interface/common';
+import { StationsVO } from 'utils/interface/common'
 
 // 板南線
 const blueStations: StationsVO[] = [
@@ -142,8 +142,8 @@ const blueStations: StationsVO[] = [
     color: LINE_COLOR.blue,
     lat: 25.05530708945024,
     lng: 121.6179144673126
-  },
-];
+  }
+]
 // 文湖線
 const brownStations: StationsVO[] = [
   {
@@ -290,7 +290,7 @@ const brownStations: StationsVO[] = [
     lat: 24.998267314843226,
     lng: 121.57951819641028
   }
-];
+]
 // 松山新店線
 const greenStations: StationsVO[] = [
   {
@@ -400,8 +400,8 @@ const greenStations: StationsVO[] = [
     color: LINE_COLOR.green,
     lat: 24.958194805512985,
     lng: 121.53807183975766
-  },
-];
+  }
+]
 // 淡水信義線
 const redStations: StationsVO[] = [
   {
@@ -565,8 +565,8 @@ const redStations: StationsVO[] = [
     color: LINE_COLOR.red,
     lat: 25.167708875723857,
     lng: 121.4456741278879
-  },
-];
+  }
+]
 // 環狀線
 const yellowStations: StationsVO[] = [
   {
@@ -652,34 +652,34 @@ const yellowStations: StationsVO[] = [
     color: LINE_COLOR.yellow,
     lat: 25.061316094805903,
     lng: 121.45974305113327
-  },
-];
+  }
+]
 
-const GetStations = (req: NextApiRequest, res: NextApiResponse) => {
-  console.log(req.query);
+const GetStations = (req: NextApiRequest, res: NextApiResponse): void => {
+  console.log(req.query)
   if (req.query.line) {
-    const lines = req.query.line as string;
-    const colors = lines.split(',');
-    let result: StationsVO[] = [];
+    const lines = req.query.line as string
+    const colors = lines.split(',')
+    let result: StationsVO[] = []
     if (colors.indexOf(COLOR.blue) !== -1) {
-      result = result.concat(blueStations);
+      result = result.concat(blueStations)
     }
     if (colors.indexOf(COLOR.brown) !== -1) {
-      result = result.concat(brownStations);
+      result = result.concat(brownStations)
     }
     if (colors.indexOf(COLOR.green) !== -1) {
-      result = result.concat(greenStations);
+      result = result.concat(greenStations)
     }
     if (colors.indexOf(COLOR.red) !== -1) {
-      result = result.concat(redStations);
+      result = result.concat(redStations)
     }
     if (colors.indexOf(COLOR.yellow) !== -1) {
-      result = result.concat(yellowStations);
+      result = result.concat(yellowStations)
     }
-    res.status(200).json({ data: result });
+    res.status(200).json({ data: result })
   } else {
-    res.status(200).json({ data: [] });
+    res.status(200).json({ data: [] })
   }
 }
 
-export default GetStations;
+export default GetStations

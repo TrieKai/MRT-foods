@@ -1,6 +1,6 @@
-import React, { useEffect, useState, ReactNode } from "react";
-import ReactDOM from "react-dom";
-import styled from "styled-components";
+import React, { useEffect, useState, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import styled from 'styled-components'
 
 const StyledModalBody = styled.div`
   display: flex;
@@ -9,7 +9,7 @@ const StyledModalBody = styled.div`
   justify-content: center;
   width: 100%;
   height: 100%;
-`;
+`
 
 const StyledModal = styled.div`
   display: flex;
@@ -22,7 +22,7 @@ const StyledModal = styled.div`
   background: white;
   border-radius: 15px;
   overflow-y: auto;
-`;
+`
 
 const StyledModalOverlay = styled.div`
   position: absolute;
@@ -36,42 +36,48 @@ const StyledModalOverlay = styled.div`
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 2;
-`;
+`
 
-interface MoadlProps {
+interface ModalProps {
   show: boolean
   onClose: Function
-  children: ReactNode
 }
 
-const Modal: React.FC<MoadlProps> = ({ show, onClose, children }) => {
-  const [isBrowser, setIsBrowser] = useState(false);
+const Modal: React.FC<ModalProps> = ({
+  show,
+  onClose,
+  children
+}): JSX.Element => {
+  const [isBrowser, setIsBrowser] = useState(false)
 
   useEffect(() => {
-    setIsBrowser(true);
-  }, []);
+    setIsBrowser(true)
+  }, [])
 
-  const handleCloseClick = (e) => {
-    e.preventDefault();
-    onClose();
-  };
+  const handleCloseClick = e => {
+    e.preventDefault()
+    onClose()
+  }
 
   const modalContent = show ? (
     <StyledModalOverlay onClick={handleCloseClick}>
-      <StyledModal onClick={(e) => { e.stopPropagation(); }}>
+      <StyledModal
+        onClick={e => {
+          e.stopPropagation()
+        }}
+      >
         <StyledModalBody>{children}</StyledModalBody>
       </StyledModal>
     </StyledModalOverlay>
-  ) : null;
+  ) : (
+    <></>
+  )
 
   if (isBrowser) {
-    return ReactDOM.createPortal(
-      modalContent,
-      document.getElementById("modal-root"),
-    );
+    return createPortal(modalContent, document.getElementById('modal-root'))
   } else {
-    return null;
+    return null
   }
 }
 
-export default Modal;
+export default Modal

@@ -1,5 +1,5 @@
-import React, { ReactNode } from "react";
-import styled, { keyframes } from "styled-components";
+import React, { ReactNode } from 'react'
+import styled, { keyframes } from 'styled-components'
 
 const animation = keyframes`
   0% {
@@ -10,7 +10,7 @@ const animation = keyframes`
   100% {
     opacity: 1;
   }
-`;
+`
 
 const StyledCard = styled.div<{ index: number }>`
   margin: 1.5rem 0px;
@@ -20,14 +20,14 @@ const StyledCard = styled.div<{ index: number }>`
   transition: box-shadow 0.2s ease 0s;
   animation-name: ${animation};
   animation-duration: 350ms;
-  animation-delay: calc(${props => props.index} * 100ms);
+  animation-delay: calc(${({ index }) => index} * 100ms);
   animation-fill-mode: both;
   animation-timing-function: ease-in-out;
 
   &:hover {
     box-shadow: rgb(0 0 0 / 10%) 0px 6px 12px;
   }
-`;
+`
 
 const StyledContent = styled.a`
   display: flex;
@@ -42,21 +42,23 @@ const StyledContent = styled.a`
   &:hover {
     color: rgb(17, 17, 17);
   }
-`;
+`
 
 interface CardListProps {
   list: ReactNode[]
   onClick: Function
 }
 
-const CardList: React.FC<CardListProps> = ({ list, onClick }) => {
-  return <>
-    {list.map((item, i) =>
-      <StyledCard index={i + 1} key={i}>
-        <StyledContent>{item}</StyledContent>
-      </StyledCard>
-    )}
-  </>
+const CardList: React.VFC<CardListProps> = ({ list, onClick }): JSX.Element => {
+  return (
+    <>
+      {list.map((item, i) => (
+        <StyledCard index={i + 1} key={i}>
+          <StyledContent>{item}</StyledContent>
+        </StyledCard>
+      ))}
+    </>
+  )
 }
 
-export default CardList;
+export default CardList
