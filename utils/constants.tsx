@@ -4,28 +4,28 @@ export enum COLOR {
   green = 'green',
   red = 'red',
   yellow = 'yellow',
-  orange = 'orange',
-};
+  orange = 'orange'
+}
 
-export const LINE_COLOR = {
+export const LINE_COLOR: { readonly [key: string]: string } = {
   [COLOR.blue]: '0070BD',
   [COLOR.brown]: 'C48C31',
   [COLOR.green]: '008659',
   [COLOR.red]: 'E3002C',
   [COLOR.yellow]: 'FDDB00',
-  [COLOR.orange]: 'F8B61C',
-};
+  [COLOR.orange]: 'F8B61C'
+}
 
-export const LINE_NAME = [
+export const LINE_NAME: { readonly key: string; readonly name: string }[] = [
   { key: COLOR.blue, name: '板南線' },
   { key: COLOR.brown, name: '文湖線' },
   { key: COLOR.green, name: '松山新店線' },
   { key: COLOR.red, name: '淡水信義線' },
-  { key: COLOR.yellow, name: '環狀線' },
+  { key: COLOR.yellow, name: '環狀線' }
   // { key: COLOR.orange, name: '中和新蘆線' }
-];
+]
 
-export const FOOD_TYPE = {
+export const FOOD_TYPE: { readonly [key: string]: string } = {
   ramen: '拉麵',
   sushi: '壽司',
   thai: '泰式料理',
@@ -42,5 +42,5 @@ export const FOOD_TYPE = {
   hotPot: '火鍋',
   eatFull: '吃到飽',
   stirFries: '熱炒',
-  teppanyaki: '鐵板燒',
-};
+  teppanyaki: '鐵板燒'
+}

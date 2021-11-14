@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Head from 'next/head'
-import styled from 'styled-components'
 import { Loader } from '@googlemaps/js-api-loader'
-import { GET } from 'utils/request'
-import { Shuffle } from 'utils/common'
+import styled from 'styled-components'
 import Modal from 'components/modal-component'
 import CheckBox from 'components/checkbox-component'
 import RadioBtn from 'components/radioButton-component'
 import CardList from 'components/cardList-component'
 import RatingComponent from 'components/rating-component'
+import { Shuffle } from 'utils/common'
+import { GET } from 'utils/request'
 
-import { StationsVO } from 'utils/interface/common'
+import { AxiosResponse } from 'axios'
 import { Place } from '@googlemaps/google-maps-services-js'
+import { StationsVO } from 'utils/interface/common'
 
 const FilterMap = styled.button`
   position: fixed;
@@ -86,7 +87,7 @@ const StyledNextBtn = styled.a<{ disable?: boolean }>`
   color: white;
   background: rgb(0, 112, 243);
   box-shadow: rgb(0 118 255 / 39%) 0px 4px 14px 0px;
-  cursor: ${props => (props.disable ? 'not-allowed' : 'pointer')};
+  cursor: ${({ disable }) => (disable ? 'not-allowed' : 'pointer')};
 
   &:hover {
     background: rgba(0, 118, 255, 0.9);
@@ -99,7 +100,7 @@ const StyledCardListWrapper = styled.div`
 `
 
 export const Home = () => {
-  const googlemap = useRef(null)
+  const googleMapRef = useRef<HTMLDivElement>(null)
   const markers = useRef<google.maps.Marker[]>([])
   const maps = useRef<google.maps.Map>(null)
   const [lines, setLines] = useState<
@@ -119,11 +120,11 @@ export const Home = () => {
 
   useEffect(() => {
     const loader = new Loader({
-      apiKey: 'AIzaSyA7dLgMg8KIMXEtN4D19b4t2-XDcy7-6Fs',
+      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY_MAP,
       version: 'weekly'
     })
     loader.load().then(() => {
-      maps.current = new window.google.maps.Map(googlemap.current, {
+      maps.current = new window.google.maps.Map(googleMapRef.current, {
         center: { lat: 25.0477703, lng: 121.5168079 }, // 台北車站座標
         zoom: 12,
         mapTypeControl: false,
@@ -141,21 +142,26 @@ export const Home = () => {
     })
   }, [])
 
-  const getStationName = async (): Promise<void> => {
-    const resp = await GET('api/getStationName', null)
+  const getStationName = useCallback(async (): Promise<void> => {
+    const resp: AxiosResponse<{ key: string; name: string }[]> = await GET(
+      'api/getStationName',
+      null
+    )
     setLines(
       resp.data.map(line => {
         return { ...line, checked: true }
       })
     )
-    const allLines = resp.data.map(line => line.key)
+    const allLines = resp.data.map(line => line.key).toString()
     getStationInfo(allLines) // Get stations info
-  }
+  }, [])
 
   const getStationInfo = async (lines: string): Promise<void> => {
     markers.current.forEach(marker => marker.setMap(null)) // clear markers
     markers.current = []
-    const resp = await GET('api/getStations', { line: lines })
+    const resp: AxiosResponse<StationsVO[]> = await GET('api/getStations', {
+      line: lines
+    })
     // 過濾掉重複的捷運站
     stations.current = resp.data.filter(
       (station: StationsVO, i: number, self: StationsVO[]) => {
@@ -233,31 +239,31 @@ export const Home = () => {
     })
   }
 
-  const closeModal = (): void => {
+  const closeModal = useCallback((): void => {
     setShowModal(false)
     setSelectedFoodType(null)
     setStep(0)
-  }
+  }, [])
 
-  const reDraw = (): void => {
+  const reDraw = useCallback((): void => {
     closeModal()
     draw()
-  }
+  }, [])
 
-  const step2 = async (): Promise<void> => {
+  const step2 = useCallback(async (): Promise<void> => {
     setStep(2)
     setSelectedFoodType(null)
     setPlaceList([])
-    const resp = await GET('api/getFoodType', null)
+    const resp: AxiosResponse<string[]> = await GET('api/getFoodType', null)
     console.log(resp.data)
     setFoodType(
       resp.data.map(type => {
         return { name: type, checked: false }
       })
     )
-  }
+  }, [])
 
-  const step3 = async (): Promise<void> => {
+  const step3 = useCallback(async (): Promise<void> => {
     if (!selectedFoodType) return
     setStep(3)
     const resp: { data: Place[] } = await GET('api/getNearbyFoods', {
@@ -267,18 +273,14 @@ export const Home = () => {
     })
     console.log(resp.data)
     setPlaceList(resp.data)
-  }
+  }, [selectedFoodType])
 
   return (
     <>
       <Head>
         <title>台北捷運美食地圖</title>
       </Head>
-      <FilterMap
-        onClick={() => {
-          setShowFilterModal(true)
-        }}
-      >
+      <FilterMap onClick={() => setShowFilterModal(true)}>
         <svg viewBox='0 0 64 64' width='30' height='30'>
           <path
             d='M56 13v6a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h46a1 1 0 0 1 1 1zm-1 15H9a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h46a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1zm0 16H9a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h46a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1z'
@@ -310,8 +312,8 @@ export const Home = () => {
           }}
         />
       </Modal>
-      <Map id='map' ref={googlemap}></Map>
-      <Modal onClose={() => closeModal()} show={showModal}>
+      <Map id='map' ref={googleMapRef} />
+      <Modal onClose={closeModal} show={showModal}>
         {step === 1 && (
           <>
             <StyledStepTitle>

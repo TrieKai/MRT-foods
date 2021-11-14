@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import { ReactNode } from 'react'
 import styled, { keyframes } from 'styled-components'
 
 const animation = keyframes`

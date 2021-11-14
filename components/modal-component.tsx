@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 
@@ -73,11 +73,10 @@ const Modal: React.FC<ModalProps> = ({
     <></>
   )
 
-  if (isBrowser) {
-    return createPortal(modalContent, document.getElementById('modal-root'))
-  } else {
-    return null
-  }
+  return (
+    isBrowser &&
+    createPortal(modalContent, document.getElementById('modal-root'))
+  )
 }
 
 export default Modal

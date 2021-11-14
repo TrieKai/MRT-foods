@@ -21,7 +21,7 @@ const GetNearbyFoods = async (
         .placesNearby({
           params: {
             location: `${lat},${lng}`,
-            key: 'AIzaSyC8eKsb7VZk8z3O9Rxvpmh0Al1zJ_zPHL8',
+            key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY_PLACES,
             keyword: keyword,
             radius: 1000, // 1km
             rankby: PlacesNearbyRanking.prominence,
