@@ -32,16 +32,15 @@ const StyledRadioBtn = styled.input`
 
 interface RadioBtnProps {
   name: string
-  data: {
-    text: string
-    checked: boolean
-  }[]
+  data: { text: string }[]
+  selectedData: string
   onChange: Function
 }
 
 const RadioBtn: React.VFC<RadioBtnProps> = ({
   name,
   data,
+  selectedData,
   onChange
 }): JSX.Element => {
   return (
@@ -51,10 +50,8 @@ const RadioBtn: React.VFC<RadioBtnProps> = ({
           <StyledRadioBtn
             type='radio'
             name={name}
-            checked={item.checked}
-            onChange={() => {
-              onChange(item.text)
-            }}
+            checked={item.text === selectedData}
+            onChange={() => onChange(item.text)}
           />
           <StyledText>{item.text}</StyledText>
         </StyledLabel>

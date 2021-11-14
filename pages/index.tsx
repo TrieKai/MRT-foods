@@ -108,8 +108,8 @@ export const Home = () => {
   >([])
   const stations = useRef<StationsVO[]>([])
   const chosenStations = useRef<StationsVO>(null)
-  const [showFilterModal, setShowFilterModal] = useState(false)
-  const [showModal, setShowModal] = useState(false)
+  const [showFilterModal, setShowFilterModal] = useState<boolean>(false)
+  const [showModal, setShowModal] = useState<boolean>(false)
   const disable = useRef<boolean>(false) // Disable for click draw btn
   const [step, setStep] = useState<number>(0)
   const [foodType, setFoodType] = useState<
@@ -332,16 +332,10 @@ export const Home = () => {
               <RadioBtn
                 name={'food'}
                 data={foodType.map(item => {
-                  return { text: item.name, checked: item.checked }
+                  return { text: item.name }
                 })}
-                onChange={(type: string) => {
-                  const selectedFoodType = foodType.find(
-                    item => item.name === type
-                  )
-                  selectedFoodType.checked = !selectedFoodType.checked
-                  setFoodType([...foodType])
-                  setSelectedFoodType(type)
-                }}
+                selectedData={selectedFoodType}
+                onChange={(type: string) => setSelectedFoodType(type)}
               />
             </StyledRadioBox>
             <StyledBtnBox>
