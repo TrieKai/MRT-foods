@@ -118,69 +118,7 @@ export const Home = () => {
   const [selectedFoodType, setSelectedFoodType] = useState<string>(null)
   const [placeList, setPlaceList] = useState<Place[]>([])
 
-  useEffect(() => {
-    const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY_MAP,
-      version: 'weekly'
-    })
-    loader.load().then(() => {
-      maps.current = new window.google.maps.Map(googleMapRef.current, {
-        center: { lat: 25.0477703, lng: 121.5168079 }, // 台北車站座標
-        zoom: 12,
-        mapTypeControl: false,
-        streetViewControl: false
-      })
-
-      getStationName() // Get all MRT lines
-
-      // Customer button on the top center
-      const centerControlDiv = document.createElement('div')
-      CenterControl(centerControlDiv)
-      maps.current.controls[google.maps.ControlPosition.TOP_CENTER].push(
-        centerControlDiv
-      )
-    })
-  }, [])
-
-  const getStationName = useCallback(async (): Promise<void> => {
-    const resp: AxiosResponse<{ key: string; name: string }[]> = await GET(
-      'api/getStationName',
-      null
-    )
-    setLines(
-      resp.data.map(line => {
-        return { ...line, checked: true }
-      })
-    )
-    const allLines = resp.data.map(line => line.key).toString()
-    getStationInfo(allLines) // Get stations info
-  }, [])
-
-  const getStationInfo = async (lines: string): Promise<void> => {
-    markers.current.forEach(marker => marker.setMap(null)) // clear markers
-    markers.current = []
-    const resp: AxiosResponse<StationsVO[]> = await GET('api/getStations', {
-      line: lines
-    })
-    // 過濾掉重複的捷運站
-    stations.current = resp.data.filter(
-      (station: StationsVO, i: number, self: StationsVO[]) => {
-        return i === self.findIndex(item => item.name === station.name)
-      }
-    )
-    stations.current.map(station => {
-      const map = maps.current
-      const marker = new window.google.maps.Marker({
-        icon: `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|${station.color}`,
-        position: station,
-        map,
-        title: station.name
-      })
-      markers.current.push(marker)
-    })
-  }
-
-  const CenterControl = (controlDiv: Element): void => {
+  const CenterControl = useCallback((controlDiv: Element): void => {
     // Set CSS for the control border.
     const controlUI = document.createElement('div')
     controlUI.style.backgroundColor = '#fff'
@@ -207,6 +145,68 @@ export const Home = () => {
 
     // Setup the click event listeners
     controlUI.addEventListener('click', draw)
+  }, [])
+
+  const getStationName = useCallback(async (): Promise<void> => {
+    const resp: AxiosResponse<{ key: string; name: string }[]> = await GET(
+      'api/getStationName',
+      null
+    )
+    setLines(
+      resp.data.map(line => {
+        return { ...line, checked: true }
+      })
+    )
+    const allLines = resp.data.map(line => line.key).toString()
+    getStationInfo(allLines) // Get stations info
+  }, [])
+
+  useEffect(() => {
+    const loader = new Loader({
+      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY_MAP,
+      version: 'weekly'
+    })
+    loader.load().then(() => {
+      maps.current = new window.google.maps.Map(googleMapRef.current, {
+        center: { lat: 25.0477703, lng: 121.5168079 }, // 台北車站座標
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false
+      })
+
+      getStationName() // Get all MRT lines
+
+      // Customer button on the top center
+      const centerControlDiv = document.createElement('div')
+      CenterControl(centerControlDiv)
+      maps.current.controls[google.maps.ControlPosition.TOP_CENTER].push(
+        centerControlDiv
+      )
+    })
+  }, [CenterControl, getStationName])
+
+  const getStationInfo = async (lines: string): Promise<void> => {
+    markers.current.forEach(marker => marker.setMap(null)) // clear markers
+    markers.current = []
+    const resp: AxiosResponse<StationsVO[]> = await GET('api/getStations', {
+      line: lines
+    })
+    // 過濾掉重複的捷運站
+    stations.current = resp.data.filter(
+      (station: StationsVO, i: number, self: StationsVO[]) => {
+        return i === self.findIndex(item => item.name === station.name)
+      }
+    )
+    stations.current.map(station => {
+      const map = maps.current
+      const marker = new window.google.maps.Marker({
+        icon: `https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|${station.color}`,
+        position: station,
+        map,
+        title: station.name
+      })
+      markers.current.push(marker)
+    })
   }
 
   const draw = (): void => {
@@ -248,7 +248,7 @@ export const Home = () => {
   const reDraw = useCallback((): void => {
     closeModal()
     draw()
-  }, [])
+  }, [closeModal])
 
   const step2 = useCallback(async (): Promise<void> => {
     setStep(2)
