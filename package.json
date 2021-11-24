@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "plop": "plop"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.1.16",
@@ -33,6 +34,7 @@
     "babel-plugin-styled-components": "^1.12.0",
     "eslint": "^7.32.0",
     "eslint-config-next": "12.0.4",
+    "plop": "^2.7.6",
     "typescript": "^4.4.4"
   }
 }

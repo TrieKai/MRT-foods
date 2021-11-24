@@ -1,0 +1,15 @@
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
+
+interface {{camelCase name}}Props {}
+
+const {{pascalCase name}} = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  return <></>
+}
+
+export const getServerSideProps: GetServerSideProps<{{camelCase name}}Props> = async context => {
+  return {
+    props: {}
+  }
+}
+
+export default {{pascalCase name}}
