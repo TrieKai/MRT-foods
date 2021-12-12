@@ -112,7 +112,7 @@ const Home = () => {
       lng: chosenStation.lng,
       type: selectedFoodType
     })
-    setPlaceList(resp.data)
+    setPlaceList(resp.data ?? [])
   }, [selectedFoodType, chosenStation])
 
   const draw = useCallback(() => {
