@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import styled from 'styled-components'
-import Modal from 'components/modal-component'
-import CheckBox from 'components/checkbox-component'
+import Modal from 'components/modal/modal'
+import CheckBox from 'components/checkbox'
 import { LineVO } from 'utils/interface/common'
 
 const FilterMapButtonContainer = styled.div``
