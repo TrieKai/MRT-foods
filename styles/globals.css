@@ -22,3 +22,9 @@ a {
   transition             : color 0.2s ease;
   cursor                 : pointer;
 }
+
+.gmnoprint a,
+.gmnoprint span,
+.gm-style-cc {
+  display: none;
+}

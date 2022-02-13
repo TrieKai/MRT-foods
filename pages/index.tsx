@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Head from 'next/head'
 import GoogleMapReact from 'google-map-react'
+import styled from 'styled-components'
 import FilterMap from 'components/filterMap'
 import Modal from 'components/modal'
 import Button from 'components/button'
@@ -10,7 +11,7 @@ import RatingComponent from 'components/rating'
 import { GET } from 'utils/request'
 import { Shuffle } from 'utils/common'
 import { ReactComponent as PinIcon } from 'assets/icon/pin.svg'
-import styled from 'styled-components'
+import { GoogleMapLayerStyles } from 'assets/googleMapStyles'
 
 import { AxiosResponse } from 'axios'
 import { LineVO, StationsVO } from 'utils/interface/common'
@@ -214,6 +215,7 @@ const Home = () => {
         defaultCenter={{ lat: 25.0477703, lng: 121.5168079 }}
         defaultZoom={12}
         onGoogleApiLoaded={onLoaded}
+        options={{ styles: GoogleMapLayerStyles }}
         yesIWantToUseGoogleMapApiInternals
       >
         {marker.map((marker, i) => {
