@@ -86,8 +86,13 @@ const Home = () => {
   const disable = useRef<boolean>(false) // Disable for click draw btn
   const [lines, setLines] = useState<LineVO[]>([])
   const stationsData = useRef<StationsVO[]>([])
-  const [chosenStation, setChosenStation] = useState<StationsVO>()
-  const [marker, setMarker] = useState<Marker[]>([])
+  const [chosenStation, setChosenStation] = useState<StationsVO>({
+    name: '',
+    color: '',
+    lat: 0,
+    lng: 0
+  })
+  const [markers, setMarkers] = useState<Marker[]>([])
   const [foodType, setFoodType] = useState<FoodType[]>([])
   const [selectedFoodType, setSelectedFoodType] = useState<string>(null)
   const [placeList, setPlaceList] = useState<Place[]>([])
@@ -114,7 +119,7 @@ const Home = () => {
       type: selectedFoodType
     })
     setPlaceList(resp.data ?? [])
-  }, [selectedFoodType, chosenStation])
+  }, [selectedFoodType, chosenStation.lat, chosenStation.lng])
 
   const draw = useCallback(() => {
     if (!mapLoaded || disable.current) return
@@ -123,7 +128,7 @@ const Home = () => {
     const shuffledData: StationsVO[] = Shuffle(stationsData.current)
     shuffledData.forEach((station, i, _self) => {
       setTimeout(() => {
-        setMarker([
+        setMarkers([
           {
             position: { lat: station.lat, lng: station.lng },
             name: station.name,
@@ -171,17 +176,15 @@ const Home = () => {
       stationsData.current = stations.filter((station, i, _self) => {
         return i === _self.findIndex(item => item.name === station.name)
       })
-      setMarker([])
-      stationsData.current.forEach(station => {
-        setMarker(marker => [
-          ...marker,
-          {
-            position: { lat: station.lat, lng: station.lng },
-            name: station.name,
-            color: station.color
-          }
-        ])
+      setMarkers([])
+      const markerData = stationsData.current.map(station => {
+        return {
+          position: { lat: station.lat, lng: station.lng },
+          name: station.name,
+          color: station.color
+        }
       })
+      setMarkers(markerData)
     }
 
     if (mapLoaded) fetchStationsInfo()
@@ -218,7 +221,7 @@ const Home = () => {
         options={{ styles: GoogleMapLayerStyles }}
         yesIWantToUseGoogleMapApiInternals
       >
-        {marker.map((marker, i) => {
+        {markers.map((marker, i) => {
           return (
             <PinContainer
               lat={marker.position.lat}
