@@ -94,7 +94,6 @@ const Home = () => {
   })
   const [markers, setMarkers] = useState<Marker[]>([])
   const [foodType, setFoodType] = useState<FoodType[]>([])
-  const [selectedFoodType, setSelectedFoodType] = useState<string>(null)
   const [placeList, setPlaceList] = useState<Place[]>([])
   const [state, send] = useMachine(myMachine)
 
@@ -112,15 +111,15 @@ const Home = () => {
     const resp: { data: Place[] } = await GET('api/getNearbyFoods', {
       lat: chosenStation.lat,
       lng: chosenStation.lng,
-      type: selectedFoodType
+      type: state.context.selectedFoodType
     })
     setPlaceList(resp.data ?? [])
-  }, [selectedFoodType, chosenStation.lat, chosenStation.lng])
+  }, [chosenStation.lat, chosenStation.lng, state.context.selectedFoodType])
 
   const draw = useCallback(() => {
     if (!mapLoaded || disable.current) return
 
-    setSelectedFoodType(null)
+    // setSelectedFoodType(null)
     disable.current = true
     const shuffledData: StationsVO[] = Shuffle(stationsData.current)
     shuffledData.forEach((station, i, _self) => {
@@ -143,13 +142,12 @@ const Home = () => {
   }, [mapLoaded, send])
 
   useEffect(() => {
+    if (state.matches('random')) draw()
     if (state.matches('step2')) step2()
     if (state.matches('step3')) step3()
-    if (state.matches('random')) draw()
   }, [draw, state, step2, step3])
 
   const onCloseModal = useCallback(() => {
-    setSelectedFoodType(null)
     send('CLOSE')
   }, [send])
 
@@ -260,8 +258,10 @@ const Home = () => {
                   data={foodType.map(item => {
                     return { text: item.name }
                   })}
-                  selectedData={selectedFoodType}
-                  onChange={(type: string) => setSelectedFoodType(type)}
+                  selectedData={state.context.selectedFoodType}
+                  onChange={(type: string) =>
+                    send('SET_SELECTED_FOOD_TYPE', { selectedFoodType: type })
+                  }
                 />
               </StyledRadioBox>
               <BtnBox>
@@ -270,10 +270,8 @@ const Home = () => {
                 </Button>
                 <Button
                   type='primary'
-                  disable={!selectedFoodType}
-                  onClick={() => {
-                    if (selectedFoodType) send('NEXT')
-                  }}
+                  disable={!state.context.selectedFoodType}
+                  onClick={() => send('NEXT')}
                 >
                   GO!
                 </Button>
@@ -294,7 +292,6 @@ const Home = () => {
                       <div>{place.vicinity}</div>
                     </>
                   ))}
-                  onClick={() => {}}
                 />
                 <BtnBox>
                   <Button type='secondary' onClick={() => send('BACK')}>

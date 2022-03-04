@@ -46,7 +46,7 @@ const StyledContent = styled.a`
 
 interface CardListProps {
   list: ReactNode[]
-  onClick: Function
+  onClick?: () => void
 }
 
 const CardList: React.VFC<CardListProps> = ({ list, onClick }): JSX.Element => {

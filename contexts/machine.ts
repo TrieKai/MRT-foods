@@ -2,6 +2,7 @@ import { ActorRefFrom, assign, createMachine } from 'xstate'
 
 type IContext = {
   showModal: boolean
+  selectedFoodType: string | null
 }
 
 type IEvent =
@@ -11,6 +12,7 @@ type IEvent =
   | { type: 'BACK' }
   | { type: 'REDO' }
   | { type: 'CLOSE' }
+  | { type: 'SET_SELECTED_FOOD_TYPE'; selectedFoodType: null }
 
 export const myMachine = createMachine(
   {
@@ -21,15 +23,19 @@ export const myMachine = createMachine(
       events: {} as IEvent
     },
     initial: 'idle',
-    context: { showModal: false },
+    context: { showModal: false, selectedFoodType: null },
     states: {
       idle: {
         on: {
-          RANDOM: 'random'
+          RANDOM: 'random',
+          SET_SELECTED_FOOD_TYPE: {
+            actions: 'setSelectedFoodType'
+          }
         },
-        entry: 'closeModal'
+        entry: ['closeModal', 'clearSelectedFoodType']
       },
       random: {
+        entry: 'clearSelectedFoodType',
         on: {
           FINISH: 'step1'
         },
@@ -44,9 +50,14 @@ export const myMachine = createMachine(
       },
       step2: {
         on: {
-          NEXT: [{ target: 'step3', cond: '' }],
+          NEXT: [
+            { target: 'step3', cond: context => !!context.selectedFoodType }
+          ],
           REDO: 'random',
-          CLOSE: 'idle'
+          CLOSE: { target: 'idle' },
+          SET_SELECTED_FOOD_TYPE: {
+            actions: 'setSelectedFoodType'
+          }
         }
       },
       step3: {
@@ -65,6 +76,12 @@ export const myMachine = createMachine(
       }),
       closeModal: assign(context => {
         return { ...context, showModal: false }
+      }),
+      setSelectedFoodType: assign((context, event) => {
+        return { ...context, selectedFoodType: event.selectedFoodType }
+      }),
+      clearSelectedFoodType: assign(context => {
+        return { ...context, selectedFoodType: null }
       })
     }
   }
