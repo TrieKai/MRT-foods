@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Head from 'next/head'
 import GoogleMapReact from 'google-map-react'
 import styled from 'styled-components'
+import { useMachine } from '@xstate/react'
+import { myMachine } from 'contexts/machine'
 import FilterMap from 'components/filterMap'
 import Modal from 'components/modal'
 import Button from 'components/button'
@@ -81,8 +83,6 @@ interface FoodType {
 
 const Home = () => {
   const [mapLoaded, setMapLoaded] = useState<boolean>(false)
-  const [step, setStep] = useState<number>(0)
-  const [showModal, setShowModal] = useState<boolean>(false)
   const disable = useRef<boolean>(false) // Disable for click draw btn
   const [lines, setLines] = useState<LineVO[]>([])
   const stationsData = useRef<StationsVO[]>([])
@@ -96,10 +96,9 @@ const Home = () => {
   const [foodType, setFoodType] = useState<FoodType[]>([])
   const [selectedFoodType, setSelectedFoodType] = useState<string>(null)
   const [placeList, setPlaceList] = useState<Place[]>([])
+  const [state, send] = useMachine(myMachine)
 
   const step2 = useCallback(async (): Promise<void> => {
-    setStep(2)
-    setSelectedFoodType(null)
     setPlaceList([])
     const resp: AxiosResponse<string[]> = await GET('api/getFoodType', null)
     setFoodType(
@@ -110,9 +109,6 @@ const Home = () => {
   }, [])
 
   const step3 = useCallback(async () => {
-    if (!selectedFoodType) return
-
-    setStep(3)
     const resp: { data: Place[] } = await GET('api/getNearbyFoods', {
       lat: chosenStation.lat,
       lng: chosenStation.lng,
@@ -124,6 +120,7 @@ const Home = () => {
   const draw = useCallback(() => {
     if (!mapLoaded || disable.current) return
 
+    setSelectedFoodType(null)
     disable.current = true
     const shuffledData: StationsVO[] = Shuffle(stationsData.current)
     shuffledData.forEach((station, i, _self) => {
@@ -137,26 +134,24 @@ const Home = () => {
         ])
 
         if (i === _self.length - 1) {
-          setStep(1)
-          setShowModal(true)
+          send('FINISH')
           setChosenStation(shuffledData[_self.length - 1])
           disable.current = false
         }
       }, 50 * i)
     })
-  }, [mapLoaded])
+  }, [mapLoaded, send])
 
-  const reDraw = useCallback((): void => {
-    setShowModal(false)
-    setStep(0)
-    draw()
-  }, [draw])
+  useEffect(() => {
+    if (state.matches('step2')) step2()
+    if (state.matches('step3')) step3()
+    if (state.matches('random')) draw()
+  }, [draw, state, step2, step3])
 
   const onCloseModal = useCallback(() => {
-    setShowModal(false)
     setSelectedFoodType(null)
-    setStep(0)
-  }, [])
+    send('CLOSE')
+  }, [send])
 
   const onLoaded = useCallback(() => setMapLoaded(true), [])
 
@@ -236,78 +231,84 @@ const Home = () => {
         })}
       </GoogleMapReact>
       <FilterMap lines={lines} setLines={setLines} />
-      {mapLoaded && <DrawButton onClick={draw}>隨機選擇捷運站</DrawButton>}
-      <Modal show={showModal} onClose={onCloseModal}>
-        {step === 1 && (
-          <>
-            <StepTitle>
-              恭喜骰到<Bold>{chosenStation?.name}</Bold>!
-            </StepTitle>
-            <BtnBox>
-              <Button type='secondary' onClick={reDraw}>
-                重新骰
-              </Button>
-              <Button type='primary' onClick={step2}>
-                下一步
-              </Button>
-            </BtnBox>
-          </>
-        )}
-        {step === 2 && (
-          <>
-            <StepTitle>選擇一個想吃的種類吧!</StepTitle>
-            <StyledRadioBox>
-              <RadioButton
-                name={'food'}
-                data={foodType.map(item => {
-                  return { text: item.name }
-                })}
-                selectedData={selectedFoodType}
-                onChange={(type: string) => setSelectedFoodType(type)}
-              />
-            </StyledRadioBox>
-            <BtnBox>
-              <Button type='secondary' onClick={reDraw}>
-                重新骰
-              </Button>
-              <Button
-                type='primary'
-                disable={!selectedFoodType}
-                onClick={step3}
-              >
-                GO!
-              </Button>
-            </BtnBox>
-          </>
-        )}
-        {step === 3 && (
-          <>
-            <CardListWrapper>
-              <CardList
-                list={placeList.map(place => (
-                  <>
-                    <b>{place.name}</b>
-                    <RatingComponent
-                      rating={place.rating}
-                      ratingNum={place.user_ratings_total}
-                    />
-                    <div>{place.vicinity}</div>
-                  </>
-                ))}
-                onClick={() => {}}
-              />
+      {mapLoaded && (
+        <DrawButton onClick={() => send('RANDOM')}>隨機選擇捷運站</DrawButton>
+      )}
+      {!(state.matches('idle') || state.matches('random')) && (
+        <Modal show={state.context.showModal} onClose={onCloseModal}>
+          {state.matches('step1') && (
+            <>
+              <StepTitle>
+                恭喜骰到<Bold>{chosenStation?.name}</Bold>!
+              </StepTitle>
               <BtnBox>
-                <Button type='secondary' onClick={step2}>
-                  返回
-                </Button>
-                <Button type='primary' onClick={reDraw}>
+                <Button type='secondary' onClick={() => send('REDO')}>
                   重新骰
                 </Button>
+                <Button type='primary' onClick={() => send('NEXT')}>
+                  下一步
+                </Button>
               </BtnBox>
-            </CardListWrapper>
-          </>
-        )}
-      </Modal>
+            </>
+          )}
+          {state.matches('step2') && (
+            <>
+              <StepTitle>選擇一個想吃的種類吧!</StepTitle>
+              <StyledRadioBox>
+                <RadioButton
+                  name={'food'}
+                  data={foodType.map(item => {
+                    return { text: item.name }
+                  })}
+                  selectedData={selectedFoodType}
+                  onChange={(type: string) => setSelectedFoodType(type)}
+                />
+              </StyledRadioBox>
+              <BtnBox>
+                <Button type='secondary' onClick={() => send('REDO')}>
+                  重新骰
+                </Button>
+                <Button
+                  type='primary'
+                  disable={!selectedFoodType}
+                  onClick={() => {
+                    if (selectedFoodType) send('NEXT')
+                  }}
+                >
+                  GO!
+                </Button>
+              </BtnBox>
+            </>
+          )}
+          {state.matches('step3') && (
+            <>
+              <CardListWrapper>
+                <CardList
+                  list={placeList.map(place => (
+                    <>
+                      <b>{place.name}</b>
+                      <RatingComponent
+                        rating={place.rating}
+                        ratingNum={place.user_ratings_total}
+                      />
+                      <div>{place.vicinity}</div>
+                    </>
+                  ))}
+                  onClick={() => {}}
+                />
+                <BtnBox>
+                  <Button type='secondary' onClick={() => send('BACK')}>
+                    返回
+                  </Button>
+                  <Button type='primary' onClick={() => send('REDO')}>
+                    重新骰
+                  </Button>
+                </BtnBox>
+              </CardListWrapper>
+            </>
+          )}
+        </Modal>
+      )}
     </>
   )
 }

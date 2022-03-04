@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 
@@ -40,7 +40,7 @@ const StyledModalOverlay = styled.div`
 
 interface ModalProps {
   show: boolean
-  onClose: Function
+  onClose: () => void
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -54,18 +54,17 @@ const Modal: React.FC<ModalProps> = ({
     setIsBrowser(true)
   }, [])
 
-  const handleCloseClick = e => {
-    e.preventDefault()
-    onClose()
-  }
+  const handleCloseClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      e.preventDefault()
+      onClose()
+    },
+    [onClose]
+  )
 
   const modalContent = show ? (
     <StyledModalOverlay onClick={handleCloseClick}>
-      <StyledModal
-        onClick={e => {
-          e.stopPropagation()
-        }}
-      >
+      <StyledModal onClick={e => e.stopPropagation()}>
         <StyledModalBody>{children}</StyledModalBody>
       </StyledModal>
     </StyledModalOverlay>
