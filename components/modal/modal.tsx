@@ -5,7 +5,7 @@ import styled from 'styled-components'
 const StyledModalBody = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;

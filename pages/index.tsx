@@ -10,6 +10,7 @@ import Button from 'components/button'
 import RadioButton from 'components/radioButton'
 import CardList from 'components/cardList'
 import RatingComponent from 'components/rating'
+import Spinner from 'components/spinner'
 import { GET } from 'utils/request'
 import { Shuffle } from 'utils/common'
 import { ReactComponent as PinIcon } from 'assets/icon/pin.svg'
@@ -95,6 +96,7 @@ const Home = () => {
   const [markers, setMarkers] = useState<Marker[]>([])
   const [foodType, setFoodType] = useState<FoodType[]>([])
   const [placeList, setPlaceList] = useState<Place[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
   const [state, send] = useMachine(myMachine)
 
   const step2 = useCallback(async (): Promise<void> => {
@@ -108,11 +110,13 @@ const Home = () => {
   }, [])
 
   const step3 = useCallback(async () => {
+    setLoading(true)
     const resp: { data: Place[] } = await GET('api/getNearbyFoods', {
       lat: chosenStation.lat,
       lng: chosenStation.lng,
       type: state.context.selectedFoodType
     })
+    setLoading(false)
     setPlaceList(resp.data ?? [])
   }, [chosenStation.lat, chosenStation.lng, state.context.selectedFoodType])
 
@@ -280,6 +284,7 @@ const Home = () => {
           )}
           {state.matches('step3') && (
             <>
+              {loading && <Spinner />}
               <CardListWrapper>
                 <CardList
                   list={placeList.map(place => (
