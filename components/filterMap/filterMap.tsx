@@ -60,7 +60,6 @@ const FilterMap: React.VFC<FilterMapProps> = ({ lines, setLines }) => {
               if (line.name === selectedLine) line.checked = !line.checked
               return line
             })
-            console.log(newLines)
             setLines([...newLines])
           }}
         />
