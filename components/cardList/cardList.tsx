@@ -45,16 +45,24 @@ const StyledContent = styled.a`
 `
 
 interface CardListProps {
-  list: ReactNode[]
-  onClick?: () => void
+  data: {
+    list: ReactNode
+    link: string
+  }[]
 }
 
-const CardList: React.VFC<CardListProps> = ({ list, onClick }): JSX.Element => {
+const CardList: React.VFC<CardListProps> = ({ data }): JSX.Element => {
   return (
     <>
-      {list.map((item, i) => (
+      {data.map((item, i) => (
         <StyledCard index={i + 1} key={i}>
-          <StyledContent>{item}</StyledContent>
+          <StyledContent
+            href={item.link}
+            target='_blank'
+            rel='noreferrer noopener'
+          >
+            {item.list}
+          </StyledContent>
         </StyledCard>
       ))}
     </>

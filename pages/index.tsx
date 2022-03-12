@@ -54,6 +54,7 @@ const StyledRadioBox = styled.div`
 `
 
 const CardListWrapper = styled.div`
+  width: 100%;
   height: inherit;
 `
 
@@ -287,16 +288,21 @@ const Home = () => {
               {loading && <Spinner />}
               <CardListWrapper>
                 <CardList
-                  list={placeList.map(place => (
-                    <>
-                      <b>{place.name}</b>
-                      <RatingComponent
-                        rating={place.rating}
-                        ratingNum={place.user_ratings_total}
-                      />
-                      <div>{place.vicinity}</div>
-                    </>
-                  ))}
+                  data={placeList.map(place => {
+                    return {
+                      list: (
+                        <>
+                          <b>{place.name}</b>
+                          <RatingComponent
+                            rating={place.rating}
+                            ratingNum={place.user_ratings_total}
+                          />
+                          <div>{place.vicinity}</div>
+                        </>
+                      ),
+                      link: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`
+                    }
+                  })}
                 />
                 <BtnBox>
                   <Button type='secondary' onClick={() => send('BACK')}>
