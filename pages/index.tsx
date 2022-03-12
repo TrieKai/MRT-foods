@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Head from 'next/head'
 import GoogleMapReact from 'google-map-react'
 import styled from 'styled-components'
-import { useMachine } from '@xstate/react'
+import { useMachine, useSelector } from '@xstate/react'
 import { myMachine } from 'contexts/machine'
 import FilterMap from 'components/filterMap'
 import Modal from 'components/modal'
@@ -98,7 +98,24 @@ const Home = () => {
   const [foodType, setFoodType] = useState<FoodType[]>([])
   const [placeList, setPlaceList] = useState<Place[]>([])
   const [loading, setLoading] = useState<boolean>(false)
-  const [state, send] = useMachine(myMachine)
+  const [{ context }, send, service] = useMachine(myMachine)
+
+  const isIdle = useSelector(service, state => state.matches('idle'))
+  const isRandom = useSelector(service, state => state.matches('random'))
+  const isStep1 = useSelector(service, state => state.matches('step1'))
+  const isStep2 = useSelector(service, state => state.matches('step2'))
+  const isStep3 = useSelector(service, state => state.matches('step3'))
+
+  const step3 = useCallback(async () => {
+    setLoading(true)
+    const resp: { data: Place[] } = await GET('api/getNearbyFoods', {
+      lat: chosenStation.lat,
+      lng: chosenStation.lng,
+      type: context.selectedFoodType
+    })
+    setLoading(false)
+    setPlaceList(resp.data ?? [])
+  }, [chosenStation.lat, chosenStation.lng, context.selectedFoodType])
 
   const step2 = useCallback(async (): Promise<void> => {
     setPlaceList([])
@@ -110,21 +127,9 @@ const Home = () => {
     )
   }, [])
 
-  const step3 = useCallback(async () => {
-    setLoading(true)
-    const resp: { data: Place[] } = await GET('api/getNearbyFoods', {
-      lat: chosenStation.lat,
-      lng: chosenStation.lng,
-      type: state.context.selectedFoodType
-    })
-    setLoading(false)
-    setPlaceList(resp.data ?? [])
-  }, [chosenStation.lat, chosenStation.lng, state.context.selectedFoodType])
-
   const draw = useCallback(() => {
     if (!mapLoaded || disable.current) return
 
-    // setSelectedFoodType(null)
     disable.current = true
     const shuffledData: StationsVO[] = Shuffle(stationsData.current)
     shuffledData.forEach((station, i, _self) => {
@@ -146,17 +151,21 @@ const Home = () => {
     })
   }, [mapLoaded, send])
 
-  useEffect(() => {
-    if (state.matches('random')) draw()
-    if (state.matches('step2')) step2()
-    if (state.matches('step3')) step3()
-  }, [draw, state, step2, step3])
-
-  const onCloseModal = useCallback(() => {
-    send('CLOSE')
-  }, [send])
+  const onCloseModal = useCallback(() => send('CLOSE'), [send])
 
   const onLoaded = useCallback(() => setMapLoaded(true), [])
+
+  useEffect(() => {
+    if (isStep3) step3()
+  }, [isStep3, step3])
+
+  useEffect(() => {
+    if (isStep2) step2()
+  }, [isStep2, step2])
+
+  useEffect(() => {
+    if (isRandom) draw()
+  }, [draw, isRandom])
 
   useEffect(() => {
     const fetchStationsInfo = async () => {
@@ -237,9 +246,9 @@ const Home = () => {
       {mapLoaded && (
         <DrawButton onClick={() => send('RANDOM')}>隨機選擇捷運站</DrawButton>
       )}
-      {!(state.matches('idle') || state.matches('random')) && (
-        <Modal show={state.context.showModal} onClose={onCloseModal}>
-          {state.matches('step1') && (
+      {!(isIdle || isRandom) && (
+        <Modal show={context.showModal} onClose={onCloseModal}>
+          {isStep1 && (
             <>
               <StepTitle>
                 恭喜骰到<Bold>{chosenStation?.name}</Bold>!
@@ -254,7 +263,7 @@ const Home = () => {
               </BtnBox>
             </>
           )}
-          {state.matches('step2') && (
+          {isStep2 && (
             <>
               <StepTitle>選擇一個想吃的種類吧!</StepTitle>
               <StyledRadioBox>
@@ -263,7 +272,7 @@ const Home = () => {
                   data={foodType.map(item => {
                     return { text: item.name }
                   })}
-                  selectedData={state.context.selectedFoodType}
+                  selectedData={context.selectedFoodType}
                   onChange={(type: string) =>
                     send('SET_SELECTED_FOOD_TYPE', { selectedFoodType: type })
                   }
@@ -275,7 +284,7 @@ const Home = () => {
                 </Button>
                 <Button
                   type='primary'
-                  disable={!state.context.selectedFoodType}
+                  disable={!context.selectedFoodType}
                   onClick={() => send('NEXT')}
                 >
                   GO!
@@ -283,7 +292,7 @@ const Home = () => {
               </BtnBox>
             </>
           )}
-          {state.matches('step3') && (
+          {isStep3 && (
             <>
               {loading && <Spinner />}
               <CardListWrapper>
