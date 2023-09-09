@@ -9,11 +9,13 @@
     "lint": "next lint",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "plop": "plop"
+    "plop": "plop",
+    "postinstall": "xstate typegen \"./contexts/**/*.ts?(x)\""
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.1.16",
     "@googlemaps/js-api-loader": "^1.11.4",
+    "@xstate/cli": "^0.5.2",
     "@xstate/react": "^2.0.0",
     "axios": "^0.21.4",
     "google-map-react": "^2.1.10",
